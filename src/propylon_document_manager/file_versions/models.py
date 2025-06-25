@@ -34,3 +34,9 @@ class User(AbstractUser):
 class FileVersion(models.Model):
     file_name = models.fields.CharField(max_length=512)
     version_number = models.fields.IntegerField()
+
+
+class File(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    url_path = models.CharField
