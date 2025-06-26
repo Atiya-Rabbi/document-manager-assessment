@@ -44,12 +44,27 @@ class User(AbstractUser):
         return reverse("users:detail", kwargs={"pk": self.id})
 
 
-class FileVersion(models.Model):
-    file_name = models.fields.CharField(max_length=512)
-    version_number = models.fields.IntegerField()
-
 
 class File(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    url_path = models.CharField(max_length=1024, unique=True)  # e.g. "/documents/reviews/review.pdf"
     created_at = models.DateTimeField(auto_now_add=True)
-    url_path = models.CharField
+    is_latest = models.BooleanField(default=True)
+    
+    #might need this
+    # current_version_id = models.PositiveIntegerField(null=True)
+    # @property
+    # def current_version(self):
+    #     return self.versions.filter(version_number=self.current_version_id).first()
+
+class FileVersion(models.Model):
+    file = models.ForeignKey(File, on_delete=models.CASCADE, related_name='versions')
+    version_number = models.PositiveIntegerField()
+    file_name = models.CharField(max_length=512)  
+    storage_path = models.FileField(upload_to='versions/')  # Actual file storage
+    created_at = models.DateTimeField(auto_now_add=True)
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = [('file', 'version_number')]
+        ordering = ['-version_number']
