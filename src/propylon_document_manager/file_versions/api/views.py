@@ -39,7 +39,8 @@ class RegisterViewSet(ViewSet):
 
 
 class LoginViewSet(ViewSet):
-    def post(self, request):
+    permission_classes = []
+    def create(self, request):
         controller = AuthController()
         user = controller.login(request.data)
         if user:
@@ -47,7 +48,8 @@ class LoginViewSet(ViewSet):
             return Response({
                 'token': token.key,
                 'user': UserSerializer(user).data
-            })
+            },status.HTTP_200_OK)
+        
         return Response(
             {'error': 'Invalid Credentials'},
             status=status.HTTP_400_BAD_REQUEST

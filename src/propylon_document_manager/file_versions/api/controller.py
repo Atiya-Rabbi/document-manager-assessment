@@ -15,8 +15,8 @@ class AuthController:
         return None
         
     def login(self, data):
-        username = data.get('username')
+        email = data.get('email')
         password = data.get('password')
         
-        user = authenticate(username=username, password=password)
+        user = authenticate(request=None, username=email, password=password)
         return user
