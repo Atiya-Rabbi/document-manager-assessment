@@ -7,34 +7,36 @@ import RegisterForm from './components/auth/RegisterForm';
 import LoginForm from './components/auth/LoginForm';
 import Navbar from './components/auth/Navbar';
 import { useEffect, useState } from 'react';
-
+import {AuthProvider} from './context/AuthContext';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsAuthenticated(!!token);
+  // useEffect(() => {
+  //   const token = localStorage.getItem('token');
+  //   setIsAuthenticated(!!token);
     
-    const handleStorageChange = () => {
-      setIsAuthenticated(!!localStorage.getItem('token'));
-    };
+  //   const handleStorageChange = () => {
+  //     setIsAuthenticated(!!localStorage.getItem('token'));
+  //   };
     
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  //   window.addEventListener('storage', handleStorageChange);
+  //   return () => window.removeEventListener('storage', handleStorageChange);
+  // }, []);
   return (
+    <AuthProvider>
     <Router>
       <Navbar />
       <div className="container mt-4">
         <Routes>
-          <Route path="/login" element={!isAuthenticated ? <LoginForm /> : <Navigate to="/files" />} />
-          <Route path="/register" element={!isAuthenticated ? <RegisterForm /> : <Navigate to="/files" />} />
-          <Route path="/files" element={isAuthenticated ? <FileVersions /> : <Navigate to="/login" />} />
-          <Route path="/" element={<Navigate to={isAuthenticated ? "/files" : "/login"} />} />
+          <Route path="/login" element={<LoginForm /> } />
+          <Route path="/register" element={<RegisterForm /> } />
+          <Route path="/files" element={<FileVersions /> } />
+          <Route path="/" element={<Navigate to={"/login"} />} />
         </Routes>
       </div>
     </Router>
+    </AuthProvider>
   );
 }
   

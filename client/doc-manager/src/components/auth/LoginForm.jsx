@@ -1,23 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const API_BASE = "http://localhost:8001/api/";
 
 const LoginForm = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
+    const [formData, setFormData] = useState({
+        email: '',
+        password: ''
     });
-  };
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
+    const { login } = useAuth();
+
+    const handleChange = (e) => {
+        setFormData({
+        ...formData,
+        [e.target.name]: e.target.value
+        });
+    };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,17 +35,21 @@ const LoginForm = () => {
         body: JSON.stringify(formData)
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Login failed');
+        throw new Error(data.message || 'Login failed');
       }
-    else if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem('token', data.token);
-        navigate('/files', { replace: true }); // Redirect after login
-        window.location.reload()
-    }
+
+      // Use the login function from context instead of directly setting localStorage
+      login(data.token);
+      
+      // Redirect after successful login
+      navigate('/files', { replace: true });
+      
     } catch (err) {
-      setError('Invalid email or password');
+      setError(err.message || 'Invalid email or password');
+      console.error('Login error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -61,9 +67,9 @@ const LoginForm = () => {
 
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                  <label htmlFor="email" className="form-label">email</label>
+                  <label htmlFor="email" className="form-label">Email</label>
                   <input
-                    type="text"
+                    type="email"  // Changed to type="email" for better validation
                     className="form-control"
                     id="email"
                     name="email"

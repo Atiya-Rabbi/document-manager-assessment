@@ -1,27 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // Sync auth state with localStorage
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
-  }, []);
+  const { user, logout } = useAuth();
 
   const handleLogout = (e) => {
     e.preventDefault();
-    
-    // Clear auth data
-    localStorage.removeItem('token');
-    setIsLoggedIn(false);
-    
-    // Navigate to login with replace to prevent back navigation
+    logout();
     navigate('/login', { replace: true });
-    
-    // Optional: Reset any other application state here
   };
 
   return (
@@ -30,7 +17,7 @@ const Navbar = () => {
         <Link className="navbar-brand" to="/">File Manager</Link>
         
         <div className="navbar-nav">
-          {isLoggedIn ? (
+          {user ? (
             <>
               <Link className="nav-link" to="/files">Files</Link>
               <button 
@@ -40,7 +27,7 @@ const Navbar = () => {
                   border: 'none', 
                   background: 'transparent', 
                   cursor: 'pointer',
-                  color: 'rgba(255, 255, 255, 0.55)' // Match nav-link color
+                  color: 'rgba(255, 255, 255, 0.55)'
                 }}
               >
                 Logout
