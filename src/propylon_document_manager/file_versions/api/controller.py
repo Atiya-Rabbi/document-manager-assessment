@@ -3,11 +3,16 @@ from django.contrib.auth import authenticate
 
 
 class AuthController:
-    serializer_class = UserSerializer
-    
+
     def register(self, data):
-        user = data.save()
-        return user
+        serializer = UserSerializer(data=data)
+        
+        if serializer.is_valid():
+            user = serializer.save()  
+            return user
+        
+        print("Registration errors:", serializer.errors) 
+        return None
         
     def login(self, data):
         username = data.get('username')

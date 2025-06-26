@@ -8,6 +8,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework import status
 from ..models import FileVersion
 from .serializers import FileVersionSerializer, UserSerializer
+from rest_framework.permissions import AllowAny
 
 class FileVersionViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
     authentication_classes = []
@@ -18,7 +19,8 @@ class FileVersionViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
 
 
 class RegisterViewSet(ViewSet):
-    def post(self, request):
+    permission_classes = [AllowAny] 
+    def create(self, request):
         controller = AuthController()
         user = controller.register(request.data)
         if user:
@@ -27,7 +29,7 @@ class RegisterViewSet(ViewSet):
                return Response({
                     'user': UserSerializer(user).data,
                     'token': token.key
-                })
+                },status=status.HTTP_201_CREATED)
 
         
         return Response(
