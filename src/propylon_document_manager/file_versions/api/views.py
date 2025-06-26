@@ -4,8 +4,10 @@ from rest_framework.response import Response
 from propylon_document_manager.file_versions.api.controller import AuthController
 from rest_framework.mixins import RetrieveModelMixin, ListModelMixin
 from rest_framework.viewsets import GenericViewSet, ViewSet
+from rest_framework.authtoken.models import Token
+from rest_framework import status
 from ..models import FileVersion
-from .serializers import FileVersionSerializer
+from .serializers import FileVersionSerializer, UserSerializer
 
 class FileVersionViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
     authentication_classes = []
@@ -18,16 +20,33 @@ class FileVersionViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
 class RegisterViewSet(ViewSet):
     def post(self, request):
         controller = AuthController()
-        status = controller.register(request.data)
-        #did the user register?
-        return Response({'success'
-            },status=status.HTTP_200)
+        user = controller.register(request.data)
+        if user:
+            token, created = Token.objects.get_or_create(user=user)
+            if created:
+               return Response({
+                    'user': UserSerializer(user).data,
+                    'token': token.key
+                })
+
+        
+        return Response(
+            {'error': 'Invalid Data'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class LoginViewSet(ViewSet):
     def post(self, request):
         controller = AuthController()
-        status = controller.login(request.data)
-        #did the user login successfully?
-        return Response({'success'
-            },status=status.HTTP_200)
+        user = controller.login(request.data)
+        if user:
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response({
+                'token': token.key,
+                'user': UserSerializer(user).data
+            })
+        return Response(
+            {'error': 'Invalid Credentials'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
