@@ -54,3 +54,11 @@ class LoginViewSet(ViewSet):
             {'error': 'Invalid Credentials'},
             status=status.HTTP_400_BAD_REQUEST
         )
+
+class LogoutViewSet(ViewSet):
+    def create(self, request):
+        request.user.auth_token.delete()
+        return Response(
+            {"detail": "Successfully logged out."},
+            status=status.HTTP_200_OK
+        )

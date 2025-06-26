@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 
+import { useNavigate } from 'react-router-dom';
 import "./FileVersions.css";
 
 function FileVersionsList(props) {
@@ -15,21 +16,42 @@ function FileVersionsList(props) {
 }
 function FileVersions() {
   const [data, setData] = useState([]);
+  
+  const navigate = useNavigate();
   console.log(data);
 
   useEffect(() => {
-    // fetch data
+    
     const dataFetch = async () => {
-      const data = await (
-        await fetch("http://localhost:8001/api/file_versions")
-      ).json();
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          navigate('/login');
+          return;
+        }
 
-      // set state when the data received
-      setData(data);
+        const response = await fetch('http://localhost:8001/api/file_versions/', {
+          headers: {
+            'Authorization': `Token ${token}`
+          }
+        });
+
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          navigate('/login');
+          return;
+        }
+
+        const data = await response.json();
+        setData(data);
+      } catch (err) {
+        console.error('Failed to fetch files:', err);
+      }
+
     };
 
     dataFetch();
-  }, []);
+  },[navigate]);
   return (
     <div>
       <h1>Found {data.length} File Versions</h1>
