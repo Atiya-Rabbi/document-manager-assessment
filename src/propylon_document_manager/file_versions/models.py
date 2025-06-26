@@ -1,9 +1,21 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.base_user import BaseUserManager as BaseUserManager
 from django.db.models import CharField, EmailField
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
+#need this to bypass username error
+class UserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('The Email must be set')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save()
+        return user
+    
 class User(AbstractUser):
     """
     Default custom user model for Propylon Document Manager.
@@ -20,6 +32,7 @@ class User(AbstractUser):
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
+    objects = UserManager()
 
     def get_absolute_url(self) -> str:
         """Get URL for user's detail view.
