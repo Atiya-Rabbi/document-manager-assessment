@@ -43,7 +43,15 @@ class User(AbstractUser):
         """
         return reverse("users:detail", kwargs={"pk": self.id})
 
+class ContentBlob(models.Model):
+    """Content Addressable Storage mechanism."""
+    content_hash = models.CharField(max_length=64, unique=True)  # SHA-256
+    data = models.BinaryField()  # FileField for large files
+    size = models.PositiveIntegerField()  # bytes
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = "CAS Content Blob"
 
 class File(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -61,7 +69,7 @@ class FileVersion(models.Model):
     file = models.ForeignKey(File, on_delete=models.CASCADE, related_name='versions')
     version_number = models.PositiveIntegerField()
     file_name = models.CharField(max_length=512)  
-    storage_path = models.FileField(upload_to='versions/')  # Actual file storage
+    content_blob = models.ForeignKey(ContentBlob, on_delete=models.PROTECT)  # CAS reference
     created_at = models.DateTimeField(auto_now_add=True)
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
 

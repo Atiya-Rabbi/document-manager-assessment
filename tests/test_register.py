@@ -14,10 +14,7 @@ def test_register_success():
         }
         
     response = client.post(url, valid_data, format='json')
-        
-    print(response.status_code)
-    print(response.data)
-
+    
     assert response.status_code == status.HTTP_201_CREATED
     assert 'token' in response.data
 
