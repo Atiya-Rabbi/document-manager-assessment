@@ -1,8 +1,9 @@
 from collections.abc import Sequence
 from typing import Any
 
+from propylon_document_manager.file_versions.models import FileVersion, ContentBlob, File
 from django.contrib.auth import get_user_model
-from factory import Faker, post_generation
+from factory import Faker, post_generation, SubFactory
 from factory.django import DjangoModelFactory
 
 
@@ -29,3 +30,28 @@ class UserFactory(DjangoModelFactory):
     class Meta:
         model = get_user_model()
         django_get_or_create = ["email"]
+
+
+class ContentBlobFactory(DjangoModelFactory):
+    class Meta:
+        model = ContentBlob
+
+    content_hash = Faker('sha256')
+    data = b"mock_file_content"
+    size = 1024
+
+class FileFactory(DjangoModelFactory):
+    class Meta:
+        model = File
+
+    url_path = Faker('file_path')
+    owner = SubFactory('tests.factories.UserFactory')
+
+class FileVersionFactory(DjangoModelFactory):
+    class Meta:
+        model = FileVersion
+
+    file = SubFactory(FileFactory)
+    content_blob = SubFactory(ContentBlobFactory)
+    version_number = 1
+    uploaded_by = SubFactory('tests.factories.UserFactory')

@@ -8,6 +8,7 @@ import LoginForm from './components/auth/LoginForm';
 import Navbar from './components/auth/Navbar';
 import { useEffect, useState } from 'react';
 import {AuthProvider} from './context/AuthContext';
+import FileUpload from './components/FileUpload';
 
 function App() {
   // const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -32,6 +33,7 @@ function App() {
           <Route path="/login" element={<LoginForm /> } />
           <Route path="/register" element={<RegisterForm /> } />
           <Route path="/files" element={<FileVersions /> } />
+          <Route path="/fileupload" element={<FileUpload /> } />
           <Route path="/" element={<Navigate to={"/login"} />} />
         </Routes>
       </div>

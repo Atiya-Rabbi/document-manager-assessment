@@ -4,7 +4,7 @@ from propylon_document_manager.file_versions.models import FileVersion, ContentB
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
-from .factories import UserFactory
+from .factories import FileVersionFactory, UserFactory, FileFactory
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 
@@ -17,19 +17,20 @@ class FileUploadTests(APITestCase):
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
         
-        # Test file data
+        self.file = FileFactory(url_path="/documents/test.pdf")
         self.test_file = SimpleUploadedFile(
             "test.pdf", 
             b"file_content", 
             content_type="application/pdf"
         )
+        
         self.url = reverse('api:fileversion-upload')  
 
     def test_authenticated_upload(self):
         """Test successful authenticated upload"""
         response = self.client.post(
             self.url,
-            {'file': self.test_file, 'path': '/documents/test.pdf'},
+            {'file': self.test_file, 'path': self.file.url_path},
             format='multipart'
         )
         self.assertEqual(response.status_code, 201)
@@ -41,7 +42,7 @@ class FileUploadTests(APITestCase):
         # First upload
         self.client.post(self.url, {
             'file': self.test_file, 
-            'path': '/documents/test.pdf'
+            'path': self.file.url_path
         }, format='multipart')
         
         # Second upload with same content
@@ -52,7 +53,7 @@ class FileUploadTests(APITestCase):
         )
         response = self.client.post(
             self.url,
-            {'file': same_file, 'path': '/documents/test.pdf'},
+            {'file': same_file, 'path': self.file.url_path},
             format='multipart'
         )
         
@@ -64,7 +65,7 @@ class FileUploadTests(APITestCase):
         # v1
         self.client.post(self.url, {
             'file': self.test_file, 
-            'path': '/documents/test.pdf'
+            'path': self.file.url_path
         }, format='multipart')
         
         # v2
@@ -75,7 +76,17 @@ class FileUploadTests(APITestCase):
         )
         response = self.client.post(
             self.url,
-            {'file': new_file, 'path': '/documents/test.pdf'},
+            {'file': new_file, 'path': self.file.url_path},
             format='multipart'
         )
         self.assertEqual(response.data['version_number'], 2)
+
+    def test_unauthenticated_upload(self):
+        """Test upload without token fails"""
+        self.client.credentials()  # Clear auth
+        response = self.client.post(
+            self.url,
+            {'file': self.test_file, 'path': self.file.url_path},
+            format='multipart'
+        )
+        self.assertEqual(response.status_code, 401)

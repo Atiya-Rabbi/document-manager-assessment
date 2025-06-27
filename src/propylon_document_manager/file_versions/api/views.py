@@ -13,9 +13,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework import status
 from ..models import ContentBlob, File, FileVersion
 from .serializers import FileVersionSerializer, UserSerializer
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 
 
