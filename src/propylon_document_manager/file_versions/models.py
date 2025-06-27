@@ -43,13 +43,36 @@ class User(AbstractUser):
         """
         return reverse("users:detail", kwargs={"pk": self.id})
 
+class ContentBlob(models.Model):
+    """Content Addressable Storage mechanism."""
+    content_hash = models.CharField(max_length=64, unique=True)  # SHA-256
+    data = models.BinaryField()  # FileField for large files
+    size = models.PositiveIntegerField()  # bytes
+    created_at = models.DateTimeField(auto_now_add=True)
 
-class FileVersion(models.Model):
-    file_name = models.fields.CharField(max_length=512)
-    version_number = models.fields.IntegerField()
-
+    class Meta:
+        verbose_name = "CAS Content Blob"
 
 class File(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    url_path = models.CharField(max_length=1024, unique=True)  # e.g. "/documents/reviews/review.pdf"
     created_at = models.DateTimeField(auto_now_add=True)
-    url_path = models.CharField
+    is_latest = models.BooleanField(default=True)
+    
+    #might need this
+    # current_version_id = models.PositiveIntegerField(null=True)
+    # @property
+    # def current_version(self):
+    #     return self.versions.filter(version_number=self.current_version_id).first()
+
+class FileVersion(models.Model):
+    file = models.ForeignKey(File, on_delete=models.CASCADE, related_name='versions')
+    version_number = models.PositiveIntegerField()
+    file_name = models.CharField(max_length=512)  
+    content_blob = models.ForeignKey(ContentBlob, on_delete=models.PROTECT)  # CAS reference
+    created_at = models.DateTimeField(auto_now_add=True)
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = [('file', 'version_number')]
+        ordering = ['-version_number']
