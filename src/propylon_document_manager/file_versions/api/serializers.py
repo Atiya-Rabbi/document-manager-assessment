@@ -1,12 +1,18 @@
 from rest_framework import serializers
 
-from ..models import FileVersion, User
+from ..models import File, FileVersion, User
 
+class FileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = File
+        fields = ['url_path'] 
+        
 class FileVersionSerializer(serializers.ModelSerializer):
+    url_path = serializers.CharField(source='file.url_path', read_only=True)
+    
     class Meta:
         model = FileVersion
-        fields = "__all__"
-
+        fields = ['id', 'version_number', 'file_name', 'created_at', 'url_path']
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

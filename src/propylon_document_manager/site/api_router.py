@@ -7,7 +7,7 @@ if settings.DEBUG:
 else:
     router = SimpleRouter()
 
-router.register("file_versions", FileVersionViewSet)
+router.register("file_versions", FileVersionViewSet, basename="fileversion")
 router.register("register", RegisterViewSet, basename="register")
 router.register("login", LoginViewSet, basename="login")
 router.register("logout", LogoutViewSet, basename="logout")

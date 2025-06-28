@@ -21,6 +21,7 @@ const Navbar = () => {
             <>
               <Link className="nav-link" to="/files">Files</Link>
               <Link className="nav-link" to="/fileupload">Files Upload</Link>
+              <Link className="nav-link" to="/fileretrieve">Files Retrieve</Link>
               <button 
                 className="nav-link btn btn-link" 
                 onClick={handleLogout}
