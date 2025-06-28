@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api/axios';
+import { useAuth } from '../../context/AuthContext';
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
@@ -11,7 +12,8 @@ const RegisterForm = () => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-
+  const { login } = useAuth();
+  
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -24,10 +26,11 @@ const RegisterForm = () => {
     setIsLoading(true);
     
     try {
-      const response = await axios.post('http://localhost:8001/api/register/', formData);
+      const response =await api.post('register/', formData);
       
       // Save token and redirect
-      localStorage.setItem('token', response.data.token);
+      // localStorage.setItem('token', response.data.token);
+      login(response.data.token);
       navigate('/files');
       
     } catch (err) {

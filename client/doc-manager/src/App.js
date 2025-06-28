@@ -32,8 +32,7 @@ function App() {
           <Route path="/register" element={<RegisterForm /> } />
           <Route path="/files" element={ <ProtectedRoute><FileVersions /></ProtectedRoute> } />
           <Route path="/fileupload" element={<ProtectedRoute><FileUpload /></ProtectedRoute> } />
-          <Route path="/fileretrieve/*" element={<ProtectedRoute> <FileViewer /> </ProtectedRoute>}/>
-          <Route path="/" element={<Navigate to={"/login"} />} />
+          <Route path="/*" element={<ProtectedRoute> <FileViewer /> </ProtectedRoute>}/>
         </Routes>
       </div>
     </Router>

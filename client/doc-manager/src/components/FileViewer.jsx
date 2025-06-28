@@ -2,22 +2,31 @@ import React, { useState, useContext, useEffect } from 'react';
 import { Button, Form, Card, ListGroup, Alert } from 'react-bootstrap';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams, useNavigate } from 'react-router-dom';
 
 
 const FileViewer = () => {
   const [searchParams] = useSearchParams();
   const revision = searchParams.get('revision');
   const [fileUrl, setFileUrl] = useState(null);
+  const navigate = useNavigate();
+  const [error, setError] = useState('');
   const location = useLocation();
-  const filePath = location.pathname.replace('/fileretrieve/', '');
-  console.log(filePath)
+  const filePath = location.pathname;
+  
+  console.log(filePath.length)
   useEffect(() => {
+    // Check for empty path
+    if (filePath.length === 1) {
+      navigate('/files', { replace: true }); // Replace in history
+      return;
+    }
     const fetchAndDisplayFile = async () => {
       try {
         const encodedPath = encodeURIComponent(filePath);
+        
         // Construct the base URL
-        let apiUrl = `http://localhost:8001/api/file_versions/retrieve/${encodedPath}/`;
+        let apiUrl = `http://localhost:8001/api/file_versions/retrieve${encodedPath}/`;
         
         // Add revision if it exists
         if (revision) {
@@ -29,17 +38,21 @@ const FileViewer = () => {
           }
         });
 
-        if (!response.ok) throw new Error('Failed to fetch file');
+        if (!response.ok) {
+          //console.log(response)
+          throw new Error('Failed to fetch file')
+          
+        };
 
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         setFileUrl(url);
 
-      } catch (error) {
-        console.error('Error:', error);
+      } catch (err) {
+        //console.error('Error:', err);
+        setError("Failed to fetch file")
       }
-    };
-
+    };  
     fetchAndDisplayFile();
 
     return () => {
@@ -48,7 +61,17 @@ const FileViewer = () => {
   }, [filePath]);
 
   const renderFileContent = () => {
-    if (!fileUrl) return <div>Loading file...</div>;
+    if (!fileUrl) {
+      return (
+        <div>
+          {error && (
+            <Alert variant="warning" className="mt-3">
+              {error}
+            </Alert>
+          )}
+        </div>
+      );
+    }
 
     const fileExtension = filePath.split('.').pop().toLowerCase();
 

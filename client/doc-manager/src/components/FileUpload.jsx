@@ -22,6 +22,15 @@ const FileUpload = () => {
       return;
     }
 
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    const pathExtension = path.split('.').pop().toLowerCase();
+
+    if (fileExtension !== pathExtension) {
+      setError('File extension and path extension must match');
+      setIsUploading(false);
+      return;
+    }
+    
     const formData = new FormData();
     formData.append('file', file);
     formData.append('path', path);

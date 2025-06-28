@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../api/axios';
 
 const API_BASE = "http://localhost:8001/api/";
 
@@ -27,20 +28,10 @@ const LoginForm = () => {
     setError('');
 
     try {
-      const response = await fetch(`${API_BASE}login/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-
+      const response = await api.post('login/', formData);
+       
+      const data = response.data;
+      
       // Use the login function from context instead of directly setting localStorage
       login(data.token);
       

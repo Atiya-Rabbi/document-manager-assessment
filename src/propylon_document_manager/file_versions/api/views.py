@@ -116,7 +116,7 @@ class FileVersionViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
     def retrieve_files(self, request, path=None):
         """
         Retrieve file by path with optional version parameter.
-        URL format: /api/fileversions/retrieve/<path>?revision=<int>
+        URL format: /api/file_versions/retrieve/<path>?revision=<int>
         """
         
         try:
