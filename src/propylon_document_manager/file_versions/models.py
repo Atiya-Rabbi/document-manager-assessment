@@ -45,7 +45,7 @@ class User(AbstractUser):
 
 class ContentBlob(models.Model):
     """Content Addressable Storage mechanism."""
-    content_hash = models.CharField(max_length=64, unique=True)  # SHA-256
+    content_hash = models.CharField(max_length=64)  # SHA-256
     data = models.BinaryField()  # FileField for large files
     size = models.PositiveIntegerField()  # bytes
     created_at = models.DateTimeField(auto_now_add=True)
@@ -55,9 +55,8 @@ class ContentBlob(models.Model):
 
 class File(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    url_path = models.CharField(max_length=1024, unique=True)  # e.g. "/documents/reviews/review.pdf"
+    url_path = models.CharField(max_length=1024)  # e.g. "/documents/reviews/review.pdf"
     created_at = models.DateTimeField(auto_now_add=True)
-    is_latest = models.BooleanField(default=True)
     
     #might need this
     # current_version_id = models.PositiveIntegerField(null=True)
@@ -72,6 +71,7 @@ class FileVersion(models.Model):
     content_blob = models.ForeignKey(ContentBlob, on_delete=models.PROTECT)  # CAS reference
     created_at = models.DateTimeField(auto_now_add=True)
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    is_latest = models.BooleanField(default=True)
 
     class Meta:
         unique_together = [('file', 'version_number')]
