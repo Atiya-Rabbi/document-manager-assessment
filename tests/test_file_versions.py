@@ -24,12 +24,14 @@ class FileUploadTests(APITestCase):
             content_type="application/pdf"
         )
         
-        self.url = reverse('api:fileversion-upload')  
+        self.urlupload = reverse('api:fileversion-upload')  
+
+        self.urlretrieve = reverse('api:fileversion-retrieve-files', kwargs={'path': 'test.txt'})
 
     def test_authenticated_upload(self):
         """Test successful authenticated upload"""
         response = self.client.post(
-            self.url,
+            self.urlupload,
             {'file': self.test_file, 'path': self.file.url_path},
             format='multipart'
         )
@@ -40,7 +42,7 @@ class FileUploadTests(APITestCase):
     def test_duplicate_content_upload(self):
         """Test uploading identical content doesn't create new blob"""
         # First upload
-        self.client.post(self.url, {
+        self.client.post(self.urlupload, {
             'file': self.test_file, 
             'path': self.file.url_path
         }, format='multipart')
@@ -52,7 +54,7 @@ class FileUploadTests(APITestCase):
             content_type="application/pdf"
         )
         response = self.client.post(
-            self.url,
+            self.urlupload,
             {'file': same_file, 'path': self.file.url_path},
             format='multipart'
         )
@@ -63,7 +65,7 @@ class FileUploadTests(APITestCase):
     def test_file_versions(self):
         """Test version numbers increment correctly"""
         # v1
-        self.client.post(self.url, {
+        self.client.post(self.urlupload, {
             'file': self.test_file, 
             'path': self.file.url_path
         }, format='multipart')
@@ -75,7 +77,7 @@ class FileUploadTests(APITestCase):
             content_type="application/pdf"
         )
         response = self.client.post(
-            self.url,
+            self.urlupload,
             {'file': new_file, 'path': self.file.url_path},
             format='multipart'
         )
@@ -85,8 +87,48 @@ class FileUploadTests(APITestCase):
         """Test upload without token fails"""
         self.client.credentials()  # Clear auth
         response = self.client.post(
-            self.url,
+            self.urlupload,
             {'file': self.test_file, 'path': self.file.url_path},
             format='multipart'
         )
         self.assertEqual(response.status_code, 401)
+
+    def test_retrieve_latest_version(self):
+        # Create a file with versions
+        file = FileFactory(owner=self.user, url_path='test.txt')
+        version1 = FileVersionFactory(file=file, version_number=1, file_name='test.txt')
+        version2 = FileVersionFactory(file=file, version_number=2, file_name='test.txt')
+        response = self.client.get(self.urlretrieve)
+        
+        assert response.status_code == 200
+        assert response['Content-Type'] == 'text/plain'
+        assert response['Content-Disposition'] == 'inline; filename="{}"'.format(version2.file_name)
+        assert response.content == version2.content_blob.data
+
+    def test_retrieve_nonexistent_version(self):
+        file = FileFactory(owner=self.user, url_path='test.txt')
+        FileVersionFactory(file=file, version_number=1, file_name='test.txt')
+        
+        response = self.client.get(self.urlretrieve + '?revision=99')
+        
+        assert response.status_code == 404
+        assert response.data['error'] == "File not found or access denied"
+
+    def test_retrieve_file_not_owned_by_user(self):
+        other_user = UserFactory()
+        file = FileFactory(owner=other_user, url_path='test.txt')
+        FileVersionFactory(file=file, version_number=1, file_name='test.txt')
+        
+        response = self.client.get(self.urlretrieve)
+        
+        assert response.status_code == 404
+        assert response.data['error'] == "File not found or access denied"
+
+    def test_malformed_revision_parameter(self):
+        file = FileFactory(owner=self.user, url_path='test.txt')
+        FileVersionFactory(file=file, version_number=1, file_name='test.txt')
+        
+        response = self.client.get(self.urlretrieve + '?revision=notanumber')
+        
+        assert response.status_code == 500
+        assert "error" in response.data

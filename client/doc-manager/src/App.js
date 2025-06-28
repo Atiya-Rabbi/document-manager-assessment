@@ -9,21 +9,19 @@ import Navbar from './components/auth/Navbar';
 import { useEffect, useState } from 'react';
 import {AuthProvider} from './context/AuthContext';
 import FileUpload from './components/FileUpload';
+import { useAuth } from './context/AuthContext';
+import FileViewer from './components/FileViewer';
 
 function App() {
-  // const [isAuthenticated, setIsAuthenticated] = useState(false);
+  function ProtectedRoute({ children }) {
+  const { user } = useAuth();
 
-  // useEffect(() => {
-  //   const token = localStorage.getItem('token');
-  //   setIsAuthenticated(!!token);
-    
-  //   const handleStorageChange = () => {
-  //     setIsAuthenticated(!!localStorage.getItem('token'));
-  //   };
-    
-  //   window.addEventListener('storage', handleStorageChange);
-  //   return () => window.removeEventListener('storage', handleStorageChange);
-  // }, []);
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
   return (
     <AuthProvider>
     <Router>
@@ -32,45 +30,13 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginForm /> } />
           <Route path="/register" element={<RegisterForm /> } />
-          <Route path="/files" element={<FileVersions /> } />
-          <Route path="/fileupload" element={<FileUpload /> } />
-          <Route path="/" element={<Navigate to={"/login"} />} />
+          <Route path="/files" element={ <ProtectedRoute><FileVersions /></ProtectedRoute> } />
+          <Route path="/fileupload" element={<ProtectedRoute><FileUpload /></ProtectedRoute> } />
+          <Route path="/*" element={<ProtectedRoute> <FileViewer /> </ProtectedRoute>}/>
         </Routes>
       </div>
     </Router>
     </AuthProvider>
   );
 }
-  
-//   return (
-//     <AuthProvider>
-//       <Router>
-//         <div className="App">
-//           {/* <Navbar /> */}
-//           <div className="container mt-4">
-//             <Routes>
-//               {/* Public Routes */}
-//               <Route path="/register" element={<RegisterForm />} />
-//               <Route 
-//                 path="/files" 
-//                 element={
-//                   <ProtectedRoute>
-//                     <FileVersions />
-//                   </ProtectedRoute>
-//                 } 
-//               />
-//               </Routes>
-//             </div>
-//           </div>
-//         </Router>
-//       </AuthProvider>
-//   );
-// }
-
-// // Protected Route Component
-// const ProtectedRoute = ({ children }) => {
-//   const { isAuthenticated } = useAuth();
-//   return isAuthenticated ? children : <Navigate to="/login" />;
-// };
-
-export default App;
+  export default App;
