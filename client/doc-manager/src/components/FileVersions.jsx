@@ -9,8 +9,8 @@ function FileVersionsList(props) {
   const navigate = useNavigate();
   const handleFileClick = async (urlPath) => {
     try {
-      const encodedPath = encodeURIComponent(urlPath.replace(/^\//, ''));
-      navigate(`/${encodedPath}`, { replace: true });
+      //const encodedPath = encodeURIComponent(urlPath.replace(/^\//, ''));
+      navigate(`/${urlPath}`, { replace: true });
     } catch (error) {
       console.error('File open error:', error);
     }
@@ -34,6 +34,19 @@ function FileVersionsList(props) {
               {file_version.url_path}
             </span>
           </p>
+          {file_version.version_number > 1 && (
+          <div className="versions-list">
+            {[...Array(file_version.version_number)].map((_, i) => (
+              <div key={i} onClick={() => handleFileClick(file_version.url_path + "?revision="+i)} style={{
+                color: 'blue',
+                textDecoration: 'underline',
+                cursor: 'pointer'
+              }}>
+                Version {i + 1}
+              </div>
+            ))}
+          </div>
+        )}
       </Card.Body>
     </Card>
   ));
@@ -80,7 +93,7 @@ function FileVersions() {
   },[navigate]);
   return (
     <div>
-      <h1>Found {data.length} File Versions</h1>
+      <h1>Your Latest Files</h1>
       <div>
         <FileVersionsList file_versions={data} />
       </div>
