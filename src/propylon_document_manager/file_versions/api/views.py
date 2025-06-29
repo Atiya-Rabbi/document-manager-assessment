@@ -34,7 +34,7 @@ class FileVersionViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
         #need to fix this
         return FileVersion.objects.filter(
             file__owner=self.request.user,
-            file__is_latest=True
+            is_latest=True
         ).select_related('file', 'content_blob')
     
     @action(detail=False, methods=['post'])
@@ -53,29 +53,39 @@ class FileVersionViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
             desired_path = desired_path.strip('/')
             content = file_obj.read()
             content_hash = hashlib.sha256(content).hexdigest()
-
+            
             #get_or_create file_instance
-            file_instance, _ = File.objects.get_or_create(
+            file_instance, created = File.objects.get_or_create(
                 url_path=desired_path,
+                owner=request.user,  
                 defaults={'owner': request.user}
             )
 
             # Check if identical content already exists
-            existing_blob = ContentBlob.objects.filter(content_hash=content_hash).first()
+            #existing_blob = ContentBlob.objects.filter(content_hash=content_hash).first()
+            # Check for existing content IN THIS USER'S FILE
+            existing_version = FileVersion.objects.filter(
+                file__owner=request.user,
+                file__url_path=desired_path,
+                content_blob__content_hash=content_hash
+            ).order_by('-version_number').first()
             
-            if existing_blob:
+            if existing_version and not created:
                 # Content unchanged - get latest version
-                current_version = file_instance.versions.first()
+                #current_version = file_instance.versions.first()
                 return Response(
                     {
                         'warning': 'Content unchanged',
-                        'version': FileVersionSerializer(current_version).data
+                        'version': FileVersionSerializer(existing_version).data
                     },
                     status=status.HTTP_200_OK
                 )
 
             # New content 
             with transaction.atomic():
+                #Set all previous versions to is_latest=False
+                file_instance.versions.update(is_latest=False)
+                
                 # Store in CAS
                 content_blob = ContentBlob.objects.create(
                     content_hash=content_hash,
@@ -89,11 +99,12 @@ class FileVersionViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
                     version_number=file_instance.versions.count() + 1,
                     file_name=os.path.basename(file_obj.name),
                     content_blob=content_blob,
-                    uploaded_by=request.user
+                    uploaded_by=request.user,
+                    is_latest = True
                 )
 
-                file_instance.is_latest = True
-                file_instance.save()
+                # file_instance.is_latest = True
+                # file_instance.save()
 
                 return Response(
                     FileVersionSerializer(new_version).data,

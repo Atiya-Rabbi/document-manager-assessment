@@ -1,7 +1,7 @@
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
-import FileVersions from './FileVersions'
+import FileVersions from './components/FileVersions';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import RegisterForm from './components/auth/RegisterForm';
 import LoginForm from './components/auth/LoginForm';
