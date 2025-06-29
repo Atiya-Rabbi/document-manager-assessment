@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import api from "./api/axios";
-import { useAuth } from "./context/AuthContext";
+import api from "../api/axios";
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from 'react-router-dom';
-import "./FileVersions.css";
+import { Card } from 'react-bootstrap';
 
 function FileVersionsList(props) {
   const file_versions = props.file_versions;
@@ -17,12 +17,12 @@ function FileVersionsList(props) {
   };
   
   return file_versions.map((file_version) => (
-    <div className="file-version" key={file_version.id}>
-      <h2>File Name: {file_version.file_name}</h2>
-      <p>
+    <Card className="mt-4" key={file_version.id}>
+      <Card.Header as="h5">File Name: {file_version.file_name}</Card.Header>
+      <Card.Body>
         ID: {file_version.id} Version: {file_version.version_number}
         <p>
-            Path: {' '}
+            File URL: {' '}
             <span 
               onClick={() => handleFileClick(file_version.url_path)}
               style={{
@@ -34,8 +34,8 @@ function FileVersionsList(props) {
               {file_version.url_path}
             </span>
           </p>
-      </p>
-    </div>
+      </Card.Body>
+    </Card>
   ));
 }
 

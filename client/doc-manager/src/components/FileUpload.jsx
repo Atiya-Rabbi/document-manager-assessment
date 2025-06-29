@@ -72,7 +72,7 @@ const FileUpload = () => {
       <Card.Body>
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
-            <Form.Label>File Path</Form.Label>
+            <Form.Label>File URL</Form.Label>
             <Form.Control
               type="text"
               value={path}
@@ -81,7 +81,7 @@ const FileUpload = () => {
               required
             />
             <Form.Text className="text-muted">
-              Absolute path where the file should be stored
+              Desired URL to view the file
             </Form.Text>
           </Form.Group>
 
