@@ -56,6 +56,7 @@ function FileVersionsList(props) {
 function FileVersions() {
   const [data, setData] = useState([]);
   
+  const API_BASE_URL = "http://localhost:8001/api/"
   const navigate = useNavigate();
   console.log(data);
 
@@ -69,7 +70,7 @@ function FileVersions() {
           return;
         }
 
-        const response = await fetch('http://localhost:8001/api/file_versions/', {
+        const response = await fetch(`${API_BASE_URL}file_versions/`, {
           headers: {
             'Authorization': `Token ${token}`
           }
