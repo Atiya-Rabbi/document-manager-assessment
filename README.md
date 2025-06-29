@@ -17,3 +17,11 @@ The client project is a [Create React App](https://create-react-app.dev/) that h
 
 ##
 [![Built with Cookiecutter Django](https://img.shields.io/badge/built%20with-Cookiecutter%20Django-ff69b4.svg?logo=cookiecutter)](https://github.com/cookiecutter/cookiecutter-django/)
+
+
+## Screenshots  
+### File Upload
+![Screenshot from 2025-06-29 15-55-35](https://github.com/user-attachments/assets/c9989def-3565-4d26-ba32-15189251d9f0)
+
+### Retrieved File  
+![Screenshot from 2025-06-29 15-32-51](https://github.com/user-attachments/assets/9508f9a0-1af1-4bb9-951c-01026a677c65)
