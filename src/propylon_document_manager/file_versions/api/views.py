@@ -31,7 +31,7 @@ class FileVersionViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
         1. The file is owned by the current user
         2. The file version is the latest (is_latest=True)
         """
-        #need to fix this
+        
         return FileVersion.objects.filter(
             file__owner=self.request.user,
             is_latest=True

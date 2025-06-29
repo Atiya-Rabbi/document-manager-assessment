@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axios';
 
-const API_BASE = "http://localhost:8001/api/";
 
 const LoginForm = () => {
     const [formData, setFormData] = useState({

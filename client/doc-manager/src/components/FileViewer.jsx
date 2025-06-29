@@ -13,8 +13,8 @@ const FileViewer = () => {
   const [error, setError] = useState('');
   const location = useLocation();
   const filePath = location.pathname;
+  const API_BASE_URL = "http://localhost:8001/api/";
   
-  console.log(filePath.length)
   useEffect(() => {
     // Check for empty path
     if (filePath.length === 1) {
@@ -26,7 +26,7 @@ const FileViewer = () => {
         const encodedPath = encodeURIComponent(filePath);
         
         // Construct the base URL
-        let apiUrl = `http://localhost:8001/api/file_versions/retrieve${encodedPath}/`;
+        let apiUrl = `${API_BASE_URL}file_versions/retrieve${encodedPath}/`;
         
         // Add revision if it exists
         if (revision) {
